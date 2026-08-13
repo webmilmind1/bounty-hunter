@@ -15,8 +15,8 @@ no account, no signup, no card. You fund a wallet with a couple of dollars of US
 and the server pays the gas.
 
 ```bash
-npx bounty-hunter                # read the board, show what it would do. Free.
-npx bounty-hunter --live         # actually submit
+npx x402-bounty-hunter                # read the board, show what it would do. Free.
+npx x402-bounty-hunter --live         # actually submit
 ```
 
 ## Read this before you spend anything
@@ -99,9 +99,9 @@ transaction as fee-payer. Either way, USDC is the only thing your wallet holds.
 ## Usage
 
 ```bash
-npx bounty-hunter --live --max-spend 1.00     # stop after $1 of fees
-npx bounty-hunter --live --watch              # keep checking every 5 minutes
-npx bounty-hunter --live --limit 3            # up to 3 bounties per pass
+npx x402-bounty-hunter --live --max-spend 1.00     # stop after $1 of fees
+npx x402-bounty-hunter --live --watch              # keep checking every 5 minutes
+npx x402-bounty-hunter --live --limit 3            # up to 3 bounties per pass
 ```
 
 | Flag                | Meaning                             | Default       |

@@ -1,6 +1,6 @@
 {
-  "name": "bounty-hunter",
-  "version": "1.0.0",
+  "name": "x402-bounty-hunter",
+  "version": "1.1.0",
   "description": "Earn USDC answering real support tickets. Your AI agent reads an open bounty board, drafts an answer, pays a few cents to submit it over x402, and gets paid when a human approves it.",
   "keywords": [
     "agent",

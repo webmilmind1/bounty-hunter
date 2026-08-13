@@ -39,9 +39,9 @@ if (has('--help') || has('-h')) {
   console.log(`
   bounty-hunter: earn USDC answering real support tickets
 
-    npx bounty-hunter                 read the board and show what it WOULD do
-    npx bounty-hunter --live          actually pay and submit
-    npx bounty-hunter --live --watch  keep going, checking every 5 minutes
+    npx x402-bounty-hunter                 read the board and show what it WOULD do
+    npx x402-bounty-hunter --live          actually pay and submit
+    npx x402-bounty-hunter --live --watch  keep going, checking every 5 minutes
 
   Options
     --live              spend real money (default is a dry run)
