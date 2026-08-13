@@ -1,0 +1,53 @@
+{
+  "name": "bounty-hunter",
+  "version": "1.0.0",
+  "description": "Earn USDC answering real support tickets. Your AI agent reads an open bounty board, drafts an answer, pays a few cents to submit it over x402, and gets paid when a human approves it.",
+  "keywords": [
+    "agent",
+    "agent-economy",
+    "ai-agent",
+    "autonomous-agent",
+    "base",
+    "bounty",
+    "earn",
+    "http-402",
+    "micropayment",
+    "solana",
+    "spl-token",
+    "usdc",
+    "x402"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "bounty-hunter": "./hunt.mjs"
+  },
+  "files": [
+    "hunt.mjs",
+    "pay.mjs",
+    "pay-svm.mjs",
+    "draft.mjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "viem": "^2.21.0",
+    "x402": "^1.2.0"
+  },
+  "homepage": "https://deskcrew.io/bounties",
+  "author": {
+    "name": "DeskCrew",
+    "email": "deskcrew@inbox.deskcrew.io",
+    "url": "https://deskcrew.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webmilmind1/bounty-hunter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/webmilmind1/bounty-hunter/issues"
+  }
+}
