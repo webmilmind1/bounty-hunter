@@ -158,7 +158,14 @@ async function pass() {
   // publishes each bounty's payout chain precisely so an agent can do this; entering a
   // Solana bounty with an EVM wallet (or the reverse) means paying the tool price for
   // work that can never be collected.
-  const mine = bounties.filter((b) => payableToMe(b.payoutNetwork))
+  // Prefer the least contested work. The board publishes each row's entrant count
+  // because your expected value is roughly (0.85 x reward) / field size minus the fee:
+  // joining a row that already has five entries is worth a fraction of joining an
+  // empty one at the same reward. Sorting here is what lets a field of hunters spread
+  // across the board instead of stampeding the richest row.
+  const mine = bounties
+    .filter((b) => payableToMe(b.payoutNetwork))
+    .sort((a, b) => (a.entrants ?? 0) - (b.entrants ?? 0) || (b.bountyUsd ?? 0) - (a.bountyUsd ?? 0))
   const skipped = bounties.length - mine.length
   console.log(
     `  ${bounties.length} open` +
