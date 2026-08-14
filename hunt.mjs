@@ -19,6 +19,7 @@ import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts'
 import { payAndPost, PaymentRefused, NETWORKS, isSolanaKey } from './pay.mjs'
 import { solanaAddressOf } from './pay-svm.mjs'
 import { draftReply, DraftFailed } from './draft.mjs'
+import { spin, MARK } from './spin.mjs'
 
 const args = process.argv.slice(2)
 const has = (f) => args.includes(f)
@@ -149,7 +150,15 @@ async function submitDraft(ticketId, body) {
 }
 
 async function pass() {
-  const bounties = await openBounties()
+  const boardSpin = spin(`reading the board at ${HOST}`)
+  let bounties
+  try {
+    bounties = await openBounties()
+  } catch (err) {
+    boardSpin.fail(`board unreachable: ${err?.message ?? err}`)
+    throw err
+  }
+  boardSpin.ok()
   if (!bounties.length) {
     console.log('  no open bounties right now')
     return
@@ -165,7 +174,9 @@ async function pass() {
   // across the board instead of stampeding the richest row.
   const mine = bounties
     .filter((b) => payableToMe(b.payoutNetwork))
-    .sort((a, b) => (a.entrants ?? 0) - (b.entrants ?? 0) || (b.bountyUsd ?? 0) - (a.bountyUsd ?? 0))
+    .sort(
+      (a, b) => (a.entrants ?? 0) - (b.entrants ?? 0) || (b.bountyUsd ?? 0) - (a.bountyUsd ?? 0),
+    )
   const skipped = bounties.length - mine.length
   console.log(
     `  ${bounties.length} open` +
@@ -196,50 +207,60 @@ async function pass() {
     }
 
     let context = ''
-    try {
-      const c = await buyContext(ticketId)
-      context = c.text
-      if (Number(c.cost) > 0) console.log(`  context: ${usd(c.cost)}`)
-    } catch (err) {
-      console.log(`  context refused (${err.reason ?? 'error'}): ${err.message}`)
-      if (err.reason === 'insufficient-funds' || err.reason === 'over-max-price') return
+    {
+      const sp = spin('buying ticket context over x402')
+      try {
+        const c = await buyContext(ticketId)
+        context = c.text
+        sp.ok(Number(c.cost) > 0 ? `context bought for ${usd(c.cost)}` : undefined)
+      } catch (err) {
+        sp.fail(`context refused (${err.reason ?? 'error'}): ${err.message}`)
+        if (err.reason === 'insufficient-funds' || err.reason === 'over-max-price') return
+      }
     }
 
     let text
-    try {
-      text = await draftReply({
-        subject: b.subject ?? '',
-        body: b.body ?? '',
-        context,
-        config: llm,
-      })
-    } catch (err) {
-      // Not worth paying to submit something the model would not stand behind.
-      console.log(`  skipped: ${err.message}`)
-      continue
+    {
+      const sp = spin('drafting an answer with your model')
+      try {
+        text = await draftReply({
+          subject: b.subject ?? '',
+          body: b.body ?? '',
+          context,
+          config: llm,
+        })
+        sp.ok()
+      } catch (err) {
+        // Not worth paying to submit something the model would not stand behind.
+        sp.fail(`skipped: ${err.message}`)
+        continue
+      }
     }
 
     attempts++
-    try {
-      const r = await submitDraft(ticketId, text)
-      if (r.paid) {
-        submitted++
-        console.log(
-          `  submitted. paid ${usd(r.priceUsd)}${r.tx ? `  tx ${r.tx.slice(0, 14)}…` : ''}`,
-        )
-        console.log('  a human at that business now decides. Approval pays you 85% of the reward.')
-      } else {
-        console.log(`  not settled (status ${r.status}), so nothing was charged`)
+    {
+      const sp = spin('submitting the draft, USDC moving over x402')
+      try {
+        const r = await submitDraft(ticketId, text)
+        if (r.paid) {
+          submitted++
+          sp.ok(`submitted. paid ${usd(r.priceUsd)}${r.tx ? `  tx ${r.tx.slice(0, 14)}…` : ''}`)
+          console.log(
+            '  a human at that business now decides. Approval pays you 85% of the reward.',
+          )
+        } else {
+          sp.fail(`not settled (status ${r.status}), so nothing was charged`)
+        }
+      } catch (err) {
+        sp.fail(`submit refused (${err.reason ?? 'error'}): ${err.message}`)
+        if (err.reason === 'insufficient-funds' || err.reason === 'over-max-price') return
       }
-    } catch (err) {
-      console.log(`  submit refused (${err.reason ?? 'error'}): ${err.message}`)
-      if (err.reason === 'insufficient-funds' || err.reason === 'over-max-price') return
     }
   }
 }
 
 async function main() {
-  console.log(`\n  bounty-hunter  ${DRY ? '(dry run)' : '(LIVE)'}`)
+  console.log(`\n  ${MARK} bounty-hunter  ${DRY ? '(dry run)' : '(LIVE)'}`)
   console.log(`  wallet ${address}`)
   console.log(`  board  ${HOST}`)
   if (!DRY) console.log(`  caps   ${usd(MAX_SPEND)} total, ${usd(MAX_PRICE)} per charge`)
