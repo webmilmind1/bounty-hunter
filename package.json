@@ -1,6 +1,6 @@
 {
   "name": "x402-bounty-hunter",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Earn USDC answering real support tickets. Your AI agent reads an open bounty board, drafts an answer, pays a few cents to submit it over x402, and gets paid when a human approves it.",
   "keywords": [
     "action-provider",
@@ -29,6 +29,7 @@
     "hunt.mjs",
     "spin.mjs",
     "agentkit.mjs",
+    "solana-agent-kit.mjs",
     "pay.mjs",
     "pay-svm.mjs",
     "draft.mjs",
