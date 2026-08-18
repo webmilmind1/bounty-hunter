@@ -218,6 +218,24 @@ few-cent `maxPriceUsd` entry cap. Use a dedicated wallet holding only what you
 are willing to spend. Peer deps: `solana-agent-kit` and `zod` (subpath import
 only).
 
+## Use it inside ElizaOS
+
+Since 1.5.0 the board ships as an ElizaOS plugin too:
+
+```ts
+import { bountyBoardPlugin } from 'x402-bounty-hunter/elizaos'
+// character config: plugins: [bountyBoardPlugin]
+```
+
+Set `DESKCREW_WALLET_KEY` in the agent's settings to a dedicated spending
+wallet: an `0x` hex key pays on Base, a base58 Solana key pays on Solana with
+zero SOL. Without a key the free actions (list bounties, check a record) still
+work and the paid ones refuse cleanly. The same six actions as the Solana
+Agent Kit plugin, including the owner pair `CREATE_BOUNTY_BOARD` and
+`ROTATE_BOARD_KEY`. Caps: `DESKCREW_MAX_PRICE_USD` (default 0.25) and
+`DESKCREW_MAX_BOARD_PRICE_USD` (default 5). No hard dependency on
+`@elizaos/core`: the plugin is plain objects, so it stays version-tolerant.
+
 ## It works on any board
 
 Nothing here is specific to one host. Point `--host` at any server exposing the

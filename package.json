@@ -1,6 +1,6 @@
 {
   "name": "x402-bounty-hunter",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Earn USDC answering real support tickets. Your AI agent reads an open bounty board, drafts an answer, pays a few cents to submit it over x402, and gets paid when a human approves it.",
   "keywords": [
     "action-provider",
@@ -30,6 +30,7 @@
     "spin.mjs",
     "agentkit.mjs",
     "solana-agent-kit.mjs",
+    "elizaos.mjs",
     "pay.mjs",
     "pay-svm.mjs",
     "draft.mjs",
@@ -61,12 +62,14 @@
     "./agentkit": "./agentkit.mjs",
     "./solana-agent-kit": "./solana-agent-kit.mjs",
     "./pay": "./pay.mjs",
-    "./pay-svm": "./pay-svm.mjs"
+    "./pay-svm": "./pay-svm.mjs",
+    "./elizaos": "./elizaos.mjs"
   },
   "peerDependencies": {
     "@coinbase/agentkit": ">=0.1.0",
     "zod": ">=3.22.0",
-    "solana-agent-kit": ">=2"
+    "solana-agent-kit": ">=2",
+    "@elizaos/core": ">=1.0.0"
   },
   "peerDependenciesMeta": {
     "@coinbase/agentkit": {
@@ -76,6 +79,9 @@
       "optional": true
     },
     "solana-agent-kit": {
+      "optional": true
+    },
+    "@elizaos/core": {
       "optional": true
     }
   }
