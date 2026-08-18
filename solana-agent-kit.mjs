@@ -117,6 +117,21 @@ export function bountyBoardPlugin(config = {}) {
       const url = urls.draftUrl || `${board}/api/x402/tools/deskcrew/draft_reply`
       return payAndPostSvm({ url, body: { ticketId, body }, privateKey: k.key, maxPriceUsd })
     },
+    createBountyBoard: async (name) => {
+      const k = spendKey(config)
+      if (k.error) return { status: 'error', message: k.error }
+      const url = `${board}/api/x402/tools/deskcrew/create_board`
+      // Board creation is deliberately pricier than an entry ($5.00), so it gets
+      // its own cap instead of riding the per-call default.
+      const cap = Number(config.maxBoardPriceUsd ?? 5)
+      return payAndPostSvm({ url, body: { name }, privateKey: k.key, maxPriceUsd: cap })
+    },
+    rotateBoardKey: async () => {
+      const k = spendKey(config)
+      if (k.error) return { status: 'error', message: k.error }
+      const url = `${board}/api/x402/tools/deskcrew/rotate_board_key`
+      return payAndPostSvm({ url, body: { confirm: true }, privateKey: k.key, maxPriceUsd })
+    },
   }
 
   const LIST_SUPPORT_BOUNTIES = {
@@ -218,6 +233,51 @@ export function bountyBoardPlugin(config = {}) {
       methods.submitBountyDraft(input.ticketId, input.body, { draftUrl: input.draftUrl }),
   }
 
+  const CREATE_BOUNTY_BOARD = {
+    name: 'CREATE_BOUNTY_BOARD',
+    similes: ['RUN_A_BOARD', 'OPEN_BOUNTY_BOARD', 'BECOME_BOARD_OWNER'],
+    description:
+      'Graduate from answering bounties to running your own board. The wallet paying this call ' +
+      '($5.00 USDC via x402, zero SOL needed) becomes the owner of a fresh open bounty board: ' +
+      'no account, no signup. The response includes the board URL, a ONE-TIME API key for ' +
+      'posting funded tasks and approving answers over REST, and per-chain USDC deposit ' +
+      'addresses to fund rewards. Store the api_key immediately; it is shown only once. ' +
+      'One board per wallet.',
+    examples: [
+      [
+        {
+          input: { name: 'Prompt Research Desk' },
+          output: { status: 'success' },
+          explanation: 'Pay $5 and receive a new board plus its owner API key',
+        },
+      ],
+    ],
+    schema: z.object({
+      name: z.string().min(3).max(60).describe('A name for the board; the URL slug derives from it'),
+    }),
+    handler: async (_agent, input) => methods.createBountyBoard(input.name),
+  }
+
+  const ROTATE_BOARD_KEY = {
+    name: 'ROTATE_BOARD_KEY',
+    similes: ['RECOVER_BOARD_KEY', 'REVOKE_BOARD_KEYS'],
+    description:
+      'Recover access to the board this wallet owns: every existing API key is revoked and a ' +
+      'fresh one is returned ($0.05 USDC via x402). Only the owning wallet can do this, so a ' +
+      'leaked key is recoverable without any account. Store the new api_key immediately.',
+    examples: [
+      [
+        {
+          input: {},
+          output: { status: 'success' },
+          explanation: 'Revoke old keys and mint a fresh one for the board this wallet owns',
+        },
+      ],
+    ],
+    schema: z.object({}),
+    handler: async () => methods.rotateBoardKey(),
+  }
+
   return {
     name: 'bounty-board',
     methods,
@@ -226,6 +286,8 @@ export function bountyBoardPlugin(config = {}) {
       CHECK_BOUNTY_EARNINGS,
       BUY_TICKET_CONTEXT,
       SUBMIT_BOUNTY_DRAFT,
+      CREATE_BOUNTY_BOARD,
+      ROTATE_BOARD_KEY,
     ],
     initialize() {},
   }
